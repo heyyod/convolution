@@ -56,7 +56,7 @@ float *MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int &conv
 
 // This function is used to convolute two signals AND save the result into a vector of samples
 // to save as a new wav file.
-float *MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int &conv_size, AudioFile<float> &conv_file)
+float *MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int &conv_size, AudioFile<float> *conv_file)
 {
     conv_size = sizeA + sizeB - 1;
     float *result = new float[conv_size];
@@ -88,7 +88,7 @@ float *MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int &conv
         {
             result[n] += static_signal[k] * moving_signal[n - k];
         }
-        conv_file.samples[0].emplace_back(result[n]);
+        conv_file->samples[0].emplace_back(result[n]);
     }
     return result;
 }
@@ -133,46 +133,51 @@ void main()
     }
     else if (sel == 2)
     {
-        AudioFile<float> pinkFile;
-        AudioFile<float> sampleFile;
+        AudioFile<float> *pinkFile = new AudioFile<float>;
+        AudioFile<float> *sampleFile = new AudioFile<float>;
 
-        pinkFile.load("pink_noise.wav");
-        sampleFile.load("sample_audio.wav");
+        pinkFile->load("pink_noise.wav");
+        sampleFile->load("sample_audio.wav");
 
         // Uncomment this to get info for the audio files
         //std::cout << "\n\nPink Noise Info: \n";
-        //pinkFile.printSummary();
+        //pinkFile->printSummary();
         //std::cout << "\nSample Audio Info: \n";
-        //sampleFile.printSummary();
+        //sampleFile->printSummary();
 
         // TASK B.A
         // The audio sample is saved into a vectror of channels.
         // Each channel is itself a vector that contains the samples.
         // We will only keep one channel from the two audio files and convolute them.
-        float *pink = &pinkFile.samples[0][0];
-        float *sample = &sampleFile.samples[0][0];
-        int pinkSize = pinkFile.getNumSamplesPerChannel();
-        int sampleSize = sampleFile.getNumSamplesPerChannel();
+        float *pink = &pinkFile->samples[0][0];
+        float *sample = &sampleFile->samples[0][0];
+        int pinkSize = pinkFile->getNumSamplesPerChannel();
+        int sampleSize = sampleFile->getNumSamplesPerChannel();
 
         std::cout << "Pink Noise - Sample Audio Convolution... (~ 2 minute)\n";
-        AudioFile<float> pinkNoise_sampleAudio;
+        AudioFile<float> *pinkNoise_sampleAudio = new AudioFile<float>;
         int conv_size = 0;
         MyConvole(sample, pink, sampleSize, pinkSize, conv_size, pinkNoise_sampleAudio);
 
         std::cout << "\nPink Noise - Sample Audio Convolution Audio Info: \n";
-        pinkNoise_sampleAudio.printSummary();
-        pinkNoise_sampleAudio.save("pinkNoise_sampleAudio.wav", AudioFileFormat::Wave);
+        pinkNoise_sampleAudio->printSummary();
+        pinkNoise_sampleAudio->save("pinkNoise_sampleAudio.wav", AudioFileFormat::Wave);
 
         // TASK B.B
         float *white = CreateRandomSignal(pinkSize);
         std::cout << "\nWhite Noise - Sample Audio Convolution... (~ 2 minute)\n";
-        AudioFile<float> whiteNoise_sampleAudio;
+        AudioFile<float> *whiteNoise_sampleAudio = new AudioFile<float>;
         conv_size = 0;
         MyConvole(sample, white, sampleSize, pinkSize, conv_size, whiteNoise_sampleAudio);
 
         std::cout << "\bWhite Noise - Sample Audio Convolution Audio Info: \n";
-        whiteNoise_sampleAudio.printSummary();
-        whiteNoise_sampleAudio.save("whiteNoise_sampleAudio.wav", AudioFileFormat::Wave);
+        whiteNoise_sampleAudio->printSummary();
+        whiteNoise_sampleAudio->save("whiteNoise_sampleAudio.wav", AudioFileFormat::Wave);
+
+        delete pinkFile;
+        delete sampleFile;
+        delete pinkNoise_sampleAudio;
+        delete whiteNoise_sampleAudio;
     }
 
     char exit;

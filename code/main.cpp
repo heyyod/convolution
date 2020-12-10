@@ -42,13 +42,11 @@ float *MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int &conv
         result[n] = 0;
 
         // In the inner loop we calculate the sum of the products
-        // for every point of the resulting convolution.
+        // for every sample of the convolution.
         // The start of the loop is detetermined by the shortest of the two lengths.
-        // Doing this minimizes the number of reps we need to enter the loop.
+        // Doing this minimizes the number of reps.
         int kStart = n < min_size ? 0 : n - min_size;
-        for (int k = kStart;
-             k < max_size && k <= n;
-             k++)
+        for (int k = kStart; k < max_size && k <= n; k++)
         {
             result[n] += static_signal[k] * moving_signal[n - k];
         }
@@ -56,13 +54,15 @@ float *MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int &conv
     return result;
 }
 
+// This function is used to convolute two signals AND save the result into a vector of samples
+// to save as a new wav file.
 float *MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int &conv_size, AudioFile<float> &conv_file)
 {
     conv_size = sizeA + sizeB - 1;
     float *result = new float[conv_size];
 
     // We know that:  f*g = g*f
-    // So we will always convolute the smaller signal onto the bigger
+    // So we will always convolute the smaller signal onto the bigger signal
     // in order to make some calculations easier.
     float *static_signal = signalA;
     float *moving_signal = signalB;
@@ -80,13 +80,11 @@ float *MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int &conv
         result[n] = 0;
 
         // In the inner loop we calculate the sum of the products
-        // for every point of the resulting convolution.
+        // for every sample of the convolution.
         // The start of the loop is detetermined by the shortest of the two lengths.
-        // Doing this minimizes the number of reps we need to enter the loop.
+        // Doing this minimizes the number of reps.
         int kStart = n < min_size ? 0 : n - min_size;
-        for (int k = kStart;
-             k < max_size && k <= n;
-             k++)
+        for (int k = kStart; (k < max_size) && (k <= n); k++)
         {
             result[n] += static_signal[k] * moving_signal[n - k];
         }
@@ -135,42 +133,46 @@ void main()
     }
     else if (sel == 2)
     {
-
         AudioFile<float> pinkFile;
         AudioFile<float> sampleFile;
 
         pinkFile.load("pink_noise.wav");
         sampleFile.load("sample_audio.wav");
 
-        std::cout << "\nPink Noise Info: \n";
-        pinkFile.printSummary();
-        std::cout << "\nSample Audio Info: \n";
-        sampleFile.printSummary();
+        // Uncomment this to get info for the audio files
+        //std::cout << "\n\nPink Noise Info: \n";
+        //pinkFile.printSummary();
+        //std::cout << "\nSample Audio Info: \n";
+        //sampleFile.printSummary();
 
         // TASK B.A
+        // The audio sample is saved into a vectror of channels.
+        // Each channel is itself a vector that contains the samples.
+        // We will only keep one channel from the two audio files and convolute them.
+        float *pink = &pinkFile.samples[0][0];
+        float *sample = &sampleFile.samples[0][0];
         int pinkSize = pinkFile.getNumSamplesPerChannel();
         int sampleSize = sampleFile.getNumSamplesPerChannel();
 
-        // We will only keep one channel from the two audio files
-        float *pink = &pinkFile.samples[0][0];
-        float *sample = &sampleFile.samples[0][0];
-
-        std::cout << "\nPink Noise - Sample Audio Convolution... (~ 2 minute)\n";
-        AudioFile<float> convolutionFile;
+        std::cout << "Pink Noise - Sample Audio Convolution... (~ 2 minute)\n";
+        AudioFile<float> pinkNoise_sampleAudio;
         int conv_size = 0;
-        float *convolution = MyConvole(sample, pink, sampleSize, pinkSize, conv_size, convolutionFile);
+        MyConvole(sample, pink, sampleSize, pinkSize, conv_size, pinkNoise_sampleAudio);
 
-        std::cout << "\nConvolution Audio Info: \n";
-        convolutionFile.printSummary();
-        convolutionFile.save("pinkNoise_sampleAudio.wav", AudioFileFormat::Wave);
+        std::cout << "\nPink Noise - Sample Audio Convolution Audio Info: \n";
+        pinkNoise_sampleAudio.printSummary();
+        pinkNoise_sampleAudio.save("pinkNoise_sampleAudio.wav", AudioFileFormat::Wave);
 
         // TASK B.B
         float *white = CreateRandomSignal(pinkSize);
         std::cout << "\nWhite Noise - Sample Audio Convolution... (~ 2 minute)\n";
-        AudioFile<float> convolutionFile;
-        int conv_size = 0;
-        float *convolution = MyConvole(sample, pink, sampleSize, pinkSize, conv_size, convolutionFile);
+        AudioFile<float> whiteNoise_sampleAudio;
+        conv_size = 0;
+        MyConvole(sample, white, sampleSize, pinkSize, conv_size, whiteNoise_sampleAudio);
 
+        std::cout << "\bWhite Noise - Sample Audio Convolution Audio Info: \n";
+        whiteNoise_sampleAudio.printSummary();
+        whiteNoise_sampleAudio.save("whiteNoise_sampleAudio.wav", AudioFileFormat::Wave);
     }
 
     char exit;

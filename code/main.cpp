@@ -1,6 +1,7 @@
 #include <iostream>
 #include <random>
 #include <algorithm>
+#include <assert.h>
 
 void CreateRandomSignal(float *signal, int size)
 {
@@ -14,7 +15,7 @@ void CreateRandomSignal(float *signal, int size)
 }
 
 // This function calculates the convolution of signalA and signalB.
-float* MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int& conv_size)
+float *MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int &conv_size)
 {
     conv_size = sizeA + sizeB - 1;
     float *result = new float[conv_size];
@@ -54,26 +55,48 @@ float* MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int& conv
 
 void main()
 {
-    // A.1
-    unsigned int N = 0;
-    while (N <= 10 && N < UINT_MAX)
+    int sel = 0;
+    std::cout << "(1) Calculate convolution for a random signal.\n";
+    std::cout << "(2) Calculate convolution for two audio files.\n";
+
+    while (!(sel == 1 || sel == 2))
     {
-        std::cout << "Enter the size of the array (N>10): ";
-        std::cin >> N;
-        std::cout << std::endl;
+        std::cout << "Select 1 or 2: ";
+        std::cin >> sel;
     }
-    float *a = new float[N];
-    CreateRandomSignal(a, N);
-    
-    // A.3
-    float b[5] = {0.2f, 0.2, 0.2, 0.2, 0.2};
 
-    // A.3
-    int conv_size = 0;
-    float *convolution = MyConvole(a, b, 10, 5, conv_size);
+    if (sel == 1)
+    {
+        // A.1
+        unsigned int N = 0;
+        while (N <= 10 && N < UINT_MAX)
+        {
+            std::cout << "Enter the size of the random signal (N>10): ";
+            std::cin >> N;
+            std::cout << std::endl;
+        }
+        float *a = new float[N];
+        CreateRandomSignal(a, N);
 
-    delete[] a;
-    delete[] convolution;
+        // A.3
+        float b[5] = {0.2f, 0.2, 0.2, 0.2, 0.2};
 
-    std::cin >> N;
+        // A.3
+        int conv_size = 0;
+        float *convolution = MyConvole(a, b, N, 5, conv_size);
+
+        // Uncomment this to print result
+        // for(int i = 0; i < conv_size; i++)
+        //    std::cout << i << ": " << convolution[i] << std::endl;
+
+        delete[] a;
+        delete[] convolution;
+    }
+    else if (sel == 2)
+    {
+
+    }
+
+    char exit;
+    std::cin >> exit;
 }

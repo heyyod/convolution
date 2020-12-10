@@ -1,17 +1,20 @@
 #include <iostream>
 #include <random>
 #include <algorithm>
+#include <limits>
 #include "AudioFile.h"
 
-void CreateRandomSignal(float *signal, int size)
+float *CreateRandomSignal(int size)
 {
     std::random_device rd;
-    std::uniform_real_distribution<float> distribution(-100.0f, 100.0f);
+    std::uniform_real_distribution<float> distribution(std::numeric_limits<float>::min(), std::numeric_limits<float>::max());
+    float *result = new float[size];
 
     for (int i = 0; i < size; i++)
     {
-        signal[i] = distribution(rd);
+        result[i] = distribution(rd);
     }
+    return result;
 }
 
 // This function calculates the convolution of signalA and signalB.
@@ -106,7 +109,7 @@ void main()
 
     if (sel == 1)
     {
-        // A.1
+        // TASK A.1
         unsigned int N = 0;
         while (N <= 10 && N < UINT_MAX)
         {
@@ -114,13 +117,12 @@ void main()
             std::cin >> N;
             std::cout << std::endl;
         }
-        float *a = new float[N];
-        CreateRandomSignal(a, N);
+        float *a = CreateRandomSignal(N);
 
-        // A.3
+        // TASK A.2
         float b[5] = {0.2f, 0.2, 0.2, 0.2, 0.2};
 
-        // A.3
+        // TASK A.3
         int conv_size = 0;
         float *convolution = MyConvole(a, b, N, 5, conv_size);
 
@@ -133,17 +135,19 @@ void main()
     }
     else if (sel == 2)
     {
+
         AudioFile<float> pinkFile;
         AudioFile<float> sampleFile;
 
         pinkFile.load("pink_noise.wav");
         sampleFile.load("sample_audio.wav");
 
-        std::cout << "Pink Noise Info: \n";
+        std::cout << "\nPink Noise Info: \n";
         pinkFile.printSummary();
         std::cout << "\nSample Audio Info: \n";
         sampleFile.printSummary();
 
+        // TASK B.A
         int pinkSize = pinkFile.getNumSamplesPerChannel();
         int sampleSize = sampleFile.getNumSamplesPerChannel();
 
@@ -151,21 +155,22 @@ void main()
         float *pink = &pinkFile.samples[0][0];
         float *sample = &sampleFile.samples[0][0];
 
-
-        std::cout << "\nComputing Audio Convolution... (~ 1 minute)\n";
+        std::cout << "\nPink Noise - Sample Audio Convolution... (~ 2 minute)\n";
         AudioFile<float> convolutionFile;
         int conv_size = 0;
         float *convolution = MyConvole(sample, pink, sampleSize, pinkSize, conv_size, convolutionFile);
-        
 
         std::cout << "\nConvolution Audio Info: \n";
         convolutionFile.printSummary();
-        convolutionFile.save("convolution_44k.wav", AudioFileFormat::Wave);
+        convolutionFile.save("pinkNoise_sampleAudio.wav", AudioFileFormat::Wave);
 
-        convolutionFile.setSampleRate(16000);
-        std::cout << "\nConvolution Audio Info (Different sample rate): \n";
-        convolutionFile.printSummary();
-        convolutionFile.save("convolution_16k.wav", AudioFileFormat::Wave);
+        // TASK B.B
+        float *white = CreateRandomSignal(pinkSize);
+        std::cout << "\nWhite Noise - Sample Audio Convolution... (~ 2 minute)\n";
+        AudioFile<float> convolutionFile;
+        int conv_size = 0;
+        float *convolution = MyConvole(sample, pink, sampleSize, pinkSize, conv_size, convolutionFile);
+
     }
 
     char exit;

@@ -14,10 +14,10 @@ void CreateRandomSignal(float *signal, int size)
 }
 
 // This function calculates the convolution of signalA and signalB.
-void MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, float *result)
+float* MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int& conv_size)
 {
-    int conv_size = sizeA + sizeB - 1;
-    result = new float[conv_size];
+    conv_size = sizeA + sizeB - 1;
+    float *result = new float[conv_size];
 
     // We know that:  f*g = g*f
     // So we will always convolute the smaller signal onto the bigger
@@ -47,8 +47,8 @@ void MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, float *resu
         {
             result[n] += static_signal[k] * moving_signal[n - k];
         }
-        std::cout << n << ": " << result[n] << '\n';
     }
+    return result;
 }
 
 void main()
@@ -69,8 +69,8 @@ void main()
     float b[5] = {0.2f, 0.2, 0.2, 0.2, 0.2};
 
     // A.3
-    float *convolution;
-    MyConvole(a, b, 10, 5, convolution);
+    int conv_size = 0;
+    float *convolution = MyConvole(a, b, 10, 5, conv_size);
 
-    //std::cin >> N;
+    std::cin >> N;
 }

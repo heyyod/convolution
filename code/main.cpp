@@ -39,7 +39,8 @@ float* MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int& conv
 
         // In the inner loop we calculate the sum of the products
         // for every point of the resulting convolution.
-        // The start of the loop is detetermined by the shortest of the two lengths
+        // The start of the loop is detetermined by the shortest of the two lengths.
+        // Doing this minimizes the number of reps we need to enter the loop.
         int kStart = n < min_size ? 0 : n - min_size;
         for (int k = kStart;
              k < max_size && k <= n;
@@ -53,9 +54,8 @@ float* MyConvole(float *signalA, float *signalB, int sizeA, int sizeB, int& conv
 
 void main()
 {
-    unsigned int N = 0;
-    
     // A.1
+    unsigned int N = 0;
     while (N <= 10 && N < UINT_MAX)
     {
         std::cout << "Enter the size of the array (N>10): ";
@@ -71,6 +71,9 @@ void main()
     // A.3
     int conv_size = 0;
     float *convolution = MyConvole(a, b, 10, 5, conv_size);
+
+    delete[] a;
+    delete[] convolution;
 
     std::cin >> N;
 }
